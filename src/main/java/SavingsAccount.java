@@ -1,6 +1,7 @@
-public class SavingsAccount implements Runnable {
-
-    private long total = 0;
+public class SavingsAccount {
+    // saving the instance variable that is of type long or double as 'volatile'
+    // and make the critical methods as synchronized method
+    private volatile long total = 0;
     private final String name;
 
     public SavingsAccount(String name) {
@@ -8,7 +9,9 @@ public class SavingsAccount implements Runnable {
         this.total = 0;
     }
 
-    public boolean withdraw(long amount) {
+    public synchronized boolean withdraw(long amount) {
+        // synchronized method here prevents another thread from modifying the underlying data
+        // without this method, we don't really know what happens between line 15 and 16
         if (amount <= this.total) {
             this.total -= amount;
             return true;
@@ -17,11 +20,11 @@ public class SavingsAccount implements Runnable {
         }
     }
 
-    public void deposit(long amount) {
+    public synchronized void deposit(long amount) {
         this.total += amount;
     }
 
-    public long getTotal() {
+    public synchronized long getTotal() {
         return this.total;
     }
 
@@ -29,22 +32,4 @@ public class SavingsAccount implements Runnable {
         return this.name;
     }
 
-    @Override
-    public void run() {
-        String curThreadName = Thread.currentThread().getName();
-        System.out.println(curThreadName + " before depositing and withdrawing = " + total);
-        this.deposit(50_000);
-        this.withdraw(30_000);
-        System.out.println(curThreadName + " after depositing and withdrawing = " + total);
-    }
-
-    public synchronized void printThread() {
-        String curThreadName = Thread.currentThread().getName();
-        System.out.println(curThreadName + " entering printThread method of " + name + " with balance of $" + total);
-        System.out.println("STATUS: Depositing $50,000");
-        this.deposit(50_000);
-        System.out.println("STATUS: Withdrawing $20,000");
-        this.withdraw(20000);
-        System.out.println(curThreadName + " exiting printThread method of " + name  + " with balance of $" + total);
-    }
 }
